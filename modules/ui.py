@@ -1,3 +1,16 @@
+import time
+import gradio as gr
+from modules.text_processor import SensitiveWordDetector
+from modules.extract_text import get_image_text
+from modules.img_sim import calculate_ssim
+
+sensitive_image_list = []
+detector = SensitiveWordDetector()
+
+def get_senstive_words_from_image(image):
+    return detector.detect_sensitive_text(get_image_text(image))
+
+
 def image_table():
     code = f"""<!-- {time.time()}-->
     <table id='images'>
@@ -42,7 +55,7 @@ def create_ui():
                     image_submit = gr.Button('识别')
                     image_text_output = gr.Textbox(label='敏感词识别结果', lines=8)
                     image_submit.click(
-                        fn=detector.detect_sensitive_text,
+                        fn=get_senstive_words_from_image,
                         inputs=image_input,
                         outputs=image_text_output,
                     )
@@ -51,7 +64,7 @@ def create_ui():
                     text_submit = gr.Button('文案识别')
                     text_output = gr.Textbox(label='敏感词识别结果', lines=8)
                     text_submit.click(
-                        fn=get_senstive_words_from_image,
+                        fn=detector.detect_sensitive_text,
                         inputs=text_input,
                         outputs=text_output,
                     )

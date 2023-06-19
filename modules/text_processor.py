@@ -10,14 +10,14 @@ class TireNode(object):
         self.is_end = False
 
 
-class SeneitiveWordDetector(object):
+class SensitiveWordDetector(object):
     """
     敏感词检测
     逐字符扫描
     """
 
     def __init__(self):
-        super(SeneitiveWordDetector, self).__init__()
+        super(SensitiveWordDetector, self).__init__()
         self.sensitive_word_list = set()
         self.root = TireNode()
         self.load_sensitive_words()
@@ -66,8 +66,12 @@ class SeneitiveWordDetector(object):
 
         return sensitive_word_list
 
+    @staticmethod
+    def detect_senstive_words_from_image(image):
+        return detect_sensitive_text(get_image_text(image))
+
 
 if __name__ == '__main__':
-    detector = SeneitiveWordDetector()
+    detector = SensitiveWordDetector()
     for line in read_large_file(Basic_Configs.get_root_path() + "/res/sms_ban.txt"):
         print(base64.b64decode(line.strip('\n')).decode('utf-8').strip('\n'))

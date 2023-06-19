@@ -3,16 +3,7 @@ import time
 import gradio as gr
 from modules.extract_text import get_image_text
 from modules.img_sim import calculate_ssim
-from modules.text_processor import SeneitiveWordDetector
 from modules.ui import create_ui
-
-detector = SeneitiveWordDetector()
-
-sensitive_image_list = []
-
-
-def get_senstive_words_from_image(image):
-    return detector.detect_sensitive_text(get_image_text(image))
 
 
 def create_demo():

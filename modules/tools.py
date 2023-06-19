@@ -6,11 +6,14 @@ def read_large_file(file_path):
         for line in file:
             yield line.rstrip('\n')
 
+
 def parse_pdd_img_url():
     return
 
+
 def parse_alice_img_url():
     return
+
 
 def parse_qh_img_url():
     return
@@ -24,7 +27,7 @@ def parse_img_url(base_url):
 
     # 爱丽丝
 
-    return 
+    return
 
 
 if __name__ == '__main__':
@@ -48,5 +51,3 @@ if __name__ == '__main__':
                "%22mask%22%7D%5D%7D%7D&pid=mm_1873810155_2320450209_111953150429&channel=4&getAvatar=avatar "
     parse_url = unquote_plus(base_url)
     print(parse_url)
-
-
