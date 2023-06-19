@@ -16,10 +16,10 @@ def get_senstive_words_from_image(image):
 
 
 def create_demo():
-    with gr.Blocks(analytics_enabled=False, title='Assert Review') as demo:
+    with gr.Blocks(analytics_enabled=False, title='Asset Review') as demo:
         interfaces = []
         assert_review_interface = create_ui()
-        interfaces += [(assert_review_interface, "Assert Review", "Assert Review")]
+        interfaces += [(assert_review_interface, "Asset Review", "Asset Review")]
 
     for interface, label, ifid in interfaces:
         interface.render()
