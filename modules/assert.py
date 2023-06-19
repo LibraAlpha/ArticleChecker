@@ -1,4 +1,5 @@
-class Article:
+
+class Assert:
     def __init__(self, title, path, is_sensitive=True, is_checked=False):
         self.update_checker = None
         self.title = title
@@ -12,6 +13,11 @@ class Article:
     # 
     """
 
+    def load_articles(self):
+        """
+        加载黑名单列表
+        :return:
+        """
 
     def list_articles(self, is_sensitive=True, is_checked=False):
         """
@@ -19,5 +25,3 @@ class Article:
         :return:
         """
         return
-
-
