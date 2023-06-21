@@ -1,5 +1,5 @@
 
-class Assert:
+class Asset:
     def __init__(self, title, path, is_sensitive=True, is_checked=False):
         self.update_checker = None
         self.title = title
@@ -13,13 +13,13 @@ class Assert:
     # 
     """
 
-    def load_articles(self):
+    def load_assets(self):
         """
         加载黑名单列表
         :return:
         """
 
-    def list_articles(self, is_sensitive=True, is_checked=False):
+    def list_assets(self, is_sensitive=True, is_checked=False):
         """
         获取图片列表
         :return:
