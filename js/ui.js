@@ -38,6 +38,15 @@ function uiElementIsVisible(el){
     return isVisible;
 }
 
+function updateInput(target){
+	let e = new Event("input", { bubbles: true })
+	Object.defineProperty(e, "target", {value: target})
+	target.dispatchEvent(e);
+}
+
 function del_sensitive_word(button, word){
-    alert("deleted", word.value())
+    textarea = gradioApp().querySelector('#extension_to_install textarea')
+    textarea.value = word
+    updateInput(textarea)
+    gradioApp().querySelector("#del_sensitive_word_btn").click()
 }

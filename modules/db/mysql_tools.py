@@ -1,4 +1,5 @@
 import configs.db as db_config
+import mysql.connector
 
 
 def get_mysql_connection(host=db_config.MYSQL_HOST,

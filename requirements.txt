@@ -11,3 +11,5 @@ scikit-image~=0.21.0
 scipy~=1.10.1
 mysql~=0.0.3
 mysql-connector-python~=8.0.33
+pyspark~=3.4.1
+redis~=4.5.5

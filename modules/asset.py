@@ -1,9 +1,9 @@
-
 class Asset:
-    def __init__(self, title, path, is_sensitive=True, is_checked=False):
+    def __init__(self, url, title, description, is_sensitive=True, is_checked=False):
         self.update_checker = None
         self.title = title
-        self.path = path
+        self.description = description
+        self.url = url
         self.is_sensitive = is_sensitive
         self.is_checked = is_checked
 
@@ -15,7 +15,7 @@ class Asset:
 
     def load_assets(self):
         """
-        加载黑名单列表
+        从redis中加载黑名单列表
         :return:
         """
 

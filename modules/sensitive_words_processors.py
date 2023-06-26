@@ -35,7 +35,7 @@ def add_sensitive_word(word):
 
 
 def find_sensitive_word(word):
-    ret = []
+    ret = set()
     conn = get_mysql_connection()
     query = f"""
         select * from sensitive_words
@@ -50,9 +50,8 @@ def find_sensitive_word(word):
         results = cursor.fetchall()
 
         for row in results:
-            word = row[0]
-            ret += word
-
+            word = row[1]
+            ret.add(word)
     except Exception as e:
         logging.warn(e)
 
@@ -111,9 +110,9 @@ def load_all():
         # 遍历结果
         for row in results:
             # TODO 处理每一行数据
-            ret += row[0]
+            ret.add(row[0])
     except Exception as e:
-        logging.warn(f"错误：{e}")
+        print()
     finally:
         # 关闭游标
         cursor.close()
