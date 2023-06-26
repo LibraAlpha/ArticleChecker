@@ -26,6 +26,16 @@ class SensitiveWordDetector(object):
         finally:
             self.build_tire(self.sensitive_word_list)
 
+    def reload(self):
+        self.sensitive_word_list = set()
+        self.root = TireNode()
+        try:
+            self.load_from_db()
+        except Exception as e:
+            self.load_from_res_file()
+        finally:
+            self.rebuild()
+
     def load_from_res_file(self, blacklist_filePath=basic_config.get_root_path() + "/res/blacklist.txt"):
         """
         加载敏感词
@@ -100,9 +110,3 @@ class SensitiveWordDetector(object):
     @staticmethod
     def detect_sensitive_words_from_image(image):
         return detect_sensitive_text(get_image_text(image))
-
-
-if __name__ == '__main__':
-    detector = SensitiveWordDetector()
-    for line in read_large_file(basic_config.get_root_path() + "/res/sms_ban.txt"):
-        print(base64.b64decode(line.strip('\n')).decode('utf-8').strip('\n'))

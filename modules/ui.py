@@ -77,6 +77,10 @@ def remove_word_from_list(word):
     detector.delete(word)
 
 
+def reload_sensitive_list():
+    detector.reload()
+
+
 def asset_table():
     asset_code = f"""<!-- {time.time()}-->
     <table id='images'>
@@ -93,7 +97,7 @@ def asset_table():
     for asset in sensitive_asset_list:
         asset_code += f"""
         <tr>
-            <td></td>
+            <td><img src={asset.url}></td>
             <td></td>
             <td></td>
             <td><button onclick="add_to_blacklist(this, 'asset.')"></td>
@@ -125,12 +129,10 @@ def word_table():
                 <td><button onclick="del_sensitive_word(this, '{word}')">删除</button></td>                
             <tr>
         """
-
     code += """
         </tbody>        
     </table>
     """
-
     return code
 
 
@@ -200,6 +202,12 @@ def create_ui():
                         fn=find_sensitive_word,
                         inputs=[input_search],
                         outputs=search_result_output
+                    )
+                    reload_btn = gr.Button("重新加载")
+                    reload_btn.click(
+                        fn=reload_sensitive_list,
+                        inputs=None,
+                        outputs=None,
                     )
                 with gr.Row():
                     word_insert = gr.Textbox(label='敏感词')

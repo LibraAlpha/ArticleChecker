@@ -32,71 +32,26 @@ def parse_img_url(base_url):
     return base_url
 
 
-# 存储广告主、素材链接、标题和描述的信息
-def store_asset(redis_client, link, title, desc, is_blocked, is_checked=False):
-    # 构建存储的键名
-    if is_blocked:
-        key = "blocked"
-    elif is_checked:
-        key = "checked"
-    else:
-        key = "uncensored"
-    type_key = f"{key}"
-
-    # 构建素材链接的键名
-    link_key = f"{type_key}:{link}"
-
-    # 构建广告主信息的字典
-
-    url_info = {
-        "title": title,
-        "desc": desc
-    }
-
-    redis_client.hset(key, link, json.dumps(url_info))
-    return
-
-
-# 读取广告主、素材链接、标题和描述的信息
-def read_asset(redis_client, url, is_blocked, is_checked=False):
-    # 构建读取的键名
-    if is_blocked:
-        key = "blocked"
-    elif is_checked:
-        key = "checked"
-    else:
-        key = "uncensored"
-
-    info = redis_client.hget(key, url)
-
-    # 解码为字符串并处理为字典格式
-    asset_info = json.loads(info.decode())
-
-    # 返回广告主信息
-    return asset_info
-
-
 if __name__ == '__main__':
-    # base_url = "https://alpha.alicdn.com/minolta/129577/0/fdc6390d0ce8125e3da246ec93d075a9.jpg_640x320.jpg?content" \
-    #            "=%7B%2215%22%3A%7B%22attrs%22%3A%7B%22mini%22%3Afalse%2C%22value%22%3A%22O1CN016MVG2Q1k0St9q6jrG_%21" \
-    #            "%212208759634621.jpg_400x400.jpg%22%7D%2C%22filters%22%3A%5B%7B%22attrs%22%3A%7B%22dst_rect%22%3A%5B0" \
-    #            "%2C0%2C460.0%2C460.0%5D%2C%22src_rect%22%3A%5B0%2C0%2C398%2C398%5D%7D%2C%22type%22%3A%22copy%22%7D%5D" \
-    #            "%7D%2C%2222%22%3A%7B%22attrs%22%3A%7B%22mini%22%3Afalse%2C%22value%22%3A%22O1CN016MVG2Q1k0St9q6jrG_" \
-    #            "%21%212208759634621.jpg_200x200.jpg%22%7D%2C%22filters%22%3A%5B%7B%22attrs%22%3A%7B%22fill%22%3A%22" \
-    #            "%23695B5231%22%2C%22rect%22%3A%5B0%2C0%2C568%2C389%5D%7D%2C%22type%22%3A%22mask%22%7D%2C%7B%22attrs" \
-    #            "%22%3A%7B%22fill%22%3A%22%23695B527F%22%2C%22rect%22%3A%5B25%2C74%2C542%2C336%5D%7D%2C%22type%22%3A" \
-    #            "%22mask%22%7D%2C%7B%22attrs%22%3A%7B%22fill%22%3A%22%232D2623FF%22%2C%22rect%22%3A%5B132%2C275%2C341" \
-    #            "%2C52%5D%7D%2C%22type%22%3A%22mask%22%7D%5D%7D%2C%2263%22%3A%7B%22value%22%3A%22%5Cu6dd8%5Cu597d" \
-    #            "%5Cu7269%22%7D%2C%2265%22%3A%7B%22value%22%3A%22%5Cu63a8%5Cu8350%5Cu5355%5Cu54c1%22%7D%2C%2267%22%3A" \
-    #            "%7B%22value%22%3A%22%5Cu6dd8%5Cu5b9d%5Cu70ed%5Cu6b3e%22%7D%2C%228%22%3A%7B%22attrs%22%3A%7B%22mini%22" \
-    #            "%3Afalse%2C%22value%22%3A%22O1CN016MVG2Q1k0St9q6jrG_%21%212208759634621.jpg_200x200.jpg%22%7D%2C" \
-    #            "%22filters%22%3A%5B%7B%22attrs%22%3A%7B%22radius%22%3A%224%22%2C%22rect%22%3A%5B0%2C0%2C200%2C200%5D" \
-    #            "%7D%2C%22type%22%3A%22gaussian_blur%22%7D%2C%7B%22attrs%22%3A%7B%22dst_rect%22%3A%5B0%2C0%2C1000" \
-    #            "%2C500%5D%2C%22src_rect%22%3A%5B0%2C50%2C200%2C100%5D%7D%2C%22type%22%3A%22copy%22%7D%2C%7B%22attrs" \
-    #            "%22%3A%7B%22fill%22%3A%22%23FFFFFF7F%22%2C%22rect%22%3A%5B0%2C0%2C1000%2C500%5D%7D%2C%22type%22%3A" \
-    #            "%22mask%22%7D%5D%7D%7D&pid=mm_1873810155_2320450209_111953150429&channel=4&getAvatar=avatar "
-    # parse_url = unquote_plus(base_url)
-    # print(parse_url)
+    # base_url = "https://alpha.alicdn.com/minolta/129577/0/fdc6390d0ce8125e3da246ec93d075a9.jpg_640x320.jpg?content"
+    # \ "=%7B%2215%22%3A%7B%22attrs%22%3A%7B%22mini%22%3Afalse%2C%22value%22%3A%22O1CN016MVG2Q1k0St9q6jrG_%21" \
+    # "%212208759634621.jpg_400x400.jpg%22%7D%2C%22filters%22%3A%5B%7B%22attrs%22%3A%7B%22dst_rect%22%3A%5B0" \
+    # "%2C0%2C460.0%2C460.0%5D%2C%22src_rect%22%3A%5B0%2C0%2C398%2C398%5D%7D%2C%22type%22%3A%22copy%22%7D%5D" \
+    # "%7D%2C%2222%22%3A%7B%22attrs%22%3A%7B%22mini%22%3Afalse%2C%22value%22%3A%22O1CN016MVG2Q1k0St9q6jrG_" \
+    # "%21%212208759634621.jpg_200x200.jpg%22%7D%2C%22filters%22%3A%5B%7B%22attrs%22%3A%7B%22fill%22%3A%22" \
+    # "%23695B5231%22%2C%22rect%22%3A%5B0%2C0%2C568%2C389%5D%7D%2C%22type%22%3A%22mask%22%7D%2C%7B%22attrs" \
+    # "%22%3A%7B%22fill%22%3A%22%23695B527F%22%2C%22rect%22%3A%5B25%2C74%2C542%2C336%5D%7D%2C%22type%22%3A" \
+    # "%22mask%22%7D%2C%7B%22attrs%22%3A%7B%22fill%22%3A%22%232D2623FF%22%2C%22rect%22%3A%5B132%2C275%2C341" \
+    # "%2C52%5D%7D%2C%22type%22%3A%22mask%22%7D%5D%7D%2C%2263%22%3A%7B%22value%22%3A%22%5Cu6dd8%5Cu597d" \
+    # "%5Cu7269%22%7D%2C%2265%22%3A%7B%22value%22%3A%22%5Cu63a8%5Cu8350%5Cu5355%5Cu54c1%22%7D%2C%2267%22%3A" \
+    # "%7B%22value%22%3A%22%5Cu6dd8%5Cu5b9d%5Cu70ed%5Cu6b3e%22%7D%2C%228%22%3A%7B%22attrs%22%3A%7B%22mini%22" \
+    # "%3Afalse%2C%22value%22%3A%22O1CN016MVG2Q1k0St9q6jrG_%21%212208759634621.jpg_200x200.jpg%22%7D%2C" \
+    # "%22filters%22%3A%5B%7B%22attrs%22%3A%7B%22radius%22%3A%224%22%2C%22rect%22%3A%5B0%2C0%2C200%2C200%5D" \
+    # "%7D%2C%22type%22%3A%22gaussian_blur%22%7D%2C%7B%22attrs%22%3A%7B%22dst_rect%22%3A%5B0%2C0%2C1000" \
+    # "%2C500%5D%2C%22src_rect%22%3A%5B0%2C50%2C200%2C100%5D%7D%2C%22type%22%3A%22copy%22%7D%2C%7B%22attrs" \
+    # "%22%3A%7B%22fill%22%3A%22%23FFFFFF7F%22%2C%22rect%22%3A%5B0%2C0%2C1000%2C500%5D%7D%2C%22type%22%3A" \
+    # "%22mask%22%7D%5D%7D%7D&pid=mm_1873810155_2320450209_111953150429&channel=4&getAvatar=avatar " parse_url =
+    # unquote_plus(base_url) print(parse_url)
 
     # 创建 Redis 连接
     r = redis.Redis(host='localhost', port=6379, db=0)
