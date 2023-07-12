@@ -6,15 +6,6 @@ from collections import namedtuple
 ScriptFile = namedtuple("ScriptFile", ['basedir', 'filename', 'path'])
 
 
-# def list_scripts(dirname):
-#     script_list = []
-#
-#     base_dir = os.path.join(javascript_path, dirname)
-#
-#     if os.path.exists(base_dir):
-#         for filename in sorted(os.listdir(base_dir)):
-#             script_list.append(ScriptFile(paths.script_path))
-
 def list_files_with_name(filename):
     res = []
 

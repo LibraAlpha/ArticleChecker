@@ -7,7 +7,7 @@ import modules.scripts
 from modules.extract_text import get_image_text
 from modules.img_sim import calculate_ssim
 from modules.sensitive_word_detector import SensitiveWordDetector
-from modules.sensitive_words_processors import find_sensitive_word, add_sensitive_word, remove_word_from_sensitive_list
+from modules.sensitive_words_tools import find_sensitive_word, add_sensitive_word, remove_word_from_sensitive_list
 
 import html
 from modules.paths_internal import javascript_path
@@ -100,7 +100,7 @@ def asset_table():
             <td><img src={asset.url}></td>
             <td></td>
             <td></td>
-            <td><button onclick="add_to_blacklist(this, 'asset.')"></td>
+            <td><button onclick="add_to_blacklist(this, {asset.url})"></td>
         <tr>
         """
     asset_code += """

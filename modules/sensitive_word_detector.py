@@ -1,7 +1,7 @@
 import base64
 from configs import basics as basic_config
 from modules.tools import read_large_file
-from modules.sensitive_words_processors import load_all
+from modules.sensitive_words_tools import load_all
 
 
 class TireNode(object):

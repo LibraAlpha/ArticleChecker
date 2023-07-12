@@ -1,5 +1,6 @@
 import logging
 from modules.db.mysql_tools import get_mysql_connection
+from configs import action_code
 
 
 def add_sensitive_word(word):
@@ -13,7 +14,7 @@ def add_sensitive_word(word):
     # 创建游标对象
     cursor = conn.cursor()
 
-    ret = ''
+    ret = action_code.WORD_ACTION_DEFAULT
 
     try:
         cursor.execute(query)
@@ -21,17 +22,15 @@ def add_sensitive_word(word):
         conn.commit()
         # 校验插入/更新是否成功
         if cursor.rowcount > 0:
-            ret = "插入/更新成功"
+            ret = action_code.WORD_INSERT_SUCCESS
         else:
             ret = "插入/更新失败"
     except Exception as e:
         ret = f"错误：{e}"
-
     finally:
         cursor.close()
         conn.close()
-
-    return ret
+        return ret
 
 
 def find_sensitive_word(word):
@@ -79,7 +78,7 @@ def remove_word_from_sensitive_list(word):
         conn.commit()
         # 校验插入/更新是否成功
         if cursor.rowcount > 0:
-            ret = "删除成功"
+            ret = action_code.WORD_DEL_SUCCESS
         else:
             ret = "删除失败，敏感词不存在"
     except Exception as e:
@@ -109,7 +108,6 @@ def load_all():
 
         # 遍历结果
         for row in results:
-            # TODO 处理每一行数据
             ret.add(row[0])
     except Exception as e:
         print()

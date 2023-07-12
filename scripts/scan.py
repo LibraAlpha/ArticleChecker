@@ -8,7 +8,11 @@ from pyspark.sql import SparkSession
 from pyspark.sql.types import StringType, IntegerType, ArrayType, DoubleType
 from pyspark import SparkConf, SparkContext
 from modules.tools import parse_img_url
-import modules.db.redis_tools as redis_tools
+from modules.db import redis_tools
+from modules.db import mysql_tools
+from modules.secret import get_md5_hash
+
+from scripts.load_ad_pos import default_list
 
 
 class Scanner(object):
@@ -78,24 +82,75 @@ class Scanner(object):
                 title_base64 = item['title']
                 desc_base64 = item['desc']
 
+    def write_to_mysql(self, iterator):
+        conn = mysql_tools.get_mysql_connection()
+        cursor = conn.cursor()
 
+        count = 0
+
+        for row in iterator:
+            asset_url = row.img_url
+            asset_title = row.title
+            asset_description = row.description
+            asset_adv = row.adv
+            ad_pos = row.ad_pos
+            asset_url_md5 = get_md5_hash(asset_url)
+            asset_dt = row.dt
+
+            if not asset_url:
+                continue
+
+            if not asset_title or asset_title == 'NULL':
+                asset_title = ''
+
+            if not asset_description or asset_description == 'NULL':
+                asset_description = ''
+
+            insert_query = f"""
+            INSERT into assets(url, url_md5, title, asset_desc, adv, ad_pos) 
+            values ('{asset_url}', '{asset_url_md5}', '{asset_title}', '{asset_description}',  '{asset_adv}', '{ad_pos}')
+            on duplicate key update 
+            url = '{asset_url}',
+            url_md5 = '{asset_url_md5}',
+            title = '{asset_title}',
+            asset_desc = '{asset_description}',
+            adv = '{asset_adv}',
+            ad_pos = '{ad_pos}'            
+            """
+
+            cursor.execute(insert_query)
+
+            count += 1
+
+            if count % 1000 == 0:
+                conn.commit()
+                count = 0
+
+        conn.commit()
+
+        cursor.close()
+        conn.close()
 
     def scan(self, date, hour=0):
-        sql_get_data = """
+        sql_get_data = f"""
             select get_json_object(kafka_value, '$.IUL') as img_url,
-            get_json_object(kafka_value, '$.AT') as ad_title,
-            get_json_object(kafka_value, '$.AD') as ad_description,            
+            get_json_object(kafka_value, '$.AT') as title,
+            get_json_object(kafka_value, '$.AD') as description,
+            get_json_object(kafka_value, '$.I') as ad_pos,
+            get_json_object(kafka_value, '$.C') as adv,
+            dt            
             from wiseadx.ods_data_mor_ro
-            where dt = '{0}'
-            and h = '{1}';            
-        """.format(date, hour)
+            where dt = '{date}'
+            and h = '{hour}';
+            and get_json_object(kafka_value, '$.I') in {default_list}            
+        """
 
-        df = self.spark.sql(sql_get_data).drop_duplicates().repartition(2000)
-        df.foreachPartition(self.write_to_redis)
+        df = self.spark.sql(sql_get_data).drop_duplicates().repartition(200)
+        df.foreachPartition(self.write_to_mysql)
 
 
 if __name__ == '__main__':
-    analyzer = Analyze()
+    scanner = Scanner()
 
     parser = argparse.ArgumentParser(description="Arg parser for ctr prediction.")
     parser.add_argument('--date', type=str, help='yyyy-mm-dd format date string')
@@ -108,8 +163,3 @@ if __name__ == '__main__':
     input_date = args.date
 
     print(input_date, action)
-
-    if action == 'pred':
-        analyzer.pred(input_date)
-    if action == 'verify':
-        analyzer.verify(input_date)
