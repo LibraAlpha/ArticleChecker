@@ -20,7 +20,7 @@ def create_demo():
 
 def webui():
     demo = create_demo()
-    demo.launch(share=True)
+    demo.launch(share=False)
 
 
 if __name__ == '__main__':

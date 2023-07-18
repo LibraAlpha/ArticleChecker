@@ -148,18 +148,21 @@ class Scanner(object):
         df = self.spark.sql(sql_get_data).drop_duplicates().repartition(200)
         df.foreachPartition(self.write_to_mysql)
 
+        return "Done"
+
 
 if __name__ == '__main__':
     scanner = Scanner()
 
     parser = argparse.ArgumentParser(description="Arg parser for ctr prediction.")
     parser.add_argument('--date', type=str, help='yyyy-mm-dd format date string')
-    parser.add_argument('--action', type=str,
-                        help='actions to perform. [verify] for validaion, [pred] for get pred results.')
+    parser.add_argument('--hour', type=str, help='data period')
 
     args = parser.parse_args()
 
-    action = args.action
     input_date = args.date
+    hour = args.hour
 
-    print(input_date, action)
+    print(input_date, hour)
+
+    scanner.scan(date, hour)
