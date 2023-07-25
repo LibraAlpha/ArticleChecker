@@ -5,20 +5,22 @@ router = APIRouter()
 
 
 @router.get('/api/adpos/list')
-def get_adpos_list(page_index: int, page_limit):
-    return adpos_tools.load(page_index, page_limit)
+async def get_adpos_list(page_index: int, page_limit: int):
+    ret = adpos_tools.load(page_index, page_limit)
+    return ret
 
 
 @router.put('/api/adpos/add')
-def add(name):
-    return adpos_tools.add(name)
+async def add(name: str):
+    ret = adpos_tools.add(name)
+    return ret
 
 
 @router.delete('/api/adpos/del')
-def delete(name):
+async def delete(name: str):
     return adpos_tools.remove(name)
 
 
 @router.get('/api/adpos/size')
-def get_table_size():
+async def get_table_size():
     return adpos_tools.get_size()
