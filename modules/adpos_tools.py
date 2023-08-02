@@ -1,174 +1,94 @@
 import logging
-from modules.db.mysql_tools import get_mysql_connection
+from modules.db import mysql_tools
+from modules.AdPos import AdPos, AdPosInfo
+from sqlalchemy import distinct, func
 from configs import action_code
 
-
-def add(adpos):
-    conn = get_mysql_connection()
-    query = f"""
-        insert into adpos (name)
-        values ({adpos})
-        on duplicate key update name =values({adpos})
-    """
-
-    # 创建游标对象
-    cursor = conn.cursor()
-
-    ret = action_code.WORD_ACTION_DEFAULT
-
-    try:
-        cursor.execute(query)
-        # 提交事务
-        conn.commit()
-        # 校验插入/更新是否成功
-        if cursor.rowcount > 0:
-            ret = action_code.ADPOS_INSERT_SUCCESS
-        else:
-            ret = "插入/更新失败"
-    except Exception as e:
-        ret = f"错误：{e}"
-    finally:
-        cursor.close()
-        conn.close()
-        return ret
-
-
-def find(adpos):
-    ret = set()
-    conn = get_mysql_connection()
-    query = f"""
-        select name from adpos
-        where
-        name like '%{adpos}%'
-    """
-
-    cursor = conn.cursor()
-    try:
-        cursor.execute(query)
-
-        results = cursor.fetchall()
-
-        for row in results:
-            word = row[1]
-            ret.add(word)
-    except Exception as e:
-        logging.warn(e)
-
-    finally:
-        # 关闭游标和连接
-        cursor.close()
-        conn.close()
-
-    return ret
-
-
-def remove(word):
-    conn = get_mysql_connection()
-    query = f"""
-        delete from adpos
-        where adpos = {word}
-    """
-
-    # 创建游标对象
-    cursor = conn.cursor()
-
-    try:
-        cursor.execute(query)
-        # 提交事务
-        conn.commit()
-        # 校验插入/更新是否成功
-        if cursor.rowcount > 0:
-            ret = action_code.WORD_DEL_SUCCESS
-        else:
-            ret = "删除失败，广告位不存在"
-    except Exception as e:
-        ret = f"错误：{e}"
-
-    finally:
-        cursor.close()
-        conn.close()
-
-    return ret
-
+# 广告位信息管理部分
 
 def load(page_index, page_limit):
     page_offset = (page_index - 1) * page_limit
 
-    ret = set()
-    conn = get_mysql_connection()
-    # 创建游标对象
-    cursor = conn.cursor()
+    session = mysql_tools.Session()
+
+    query = session.query(AdPosInfo)
+
+    total_count = query.count()
 
     # 执行查询语句
-    query = f"""SELECT name 
-        FROM adpos        
-        limit {page_limit}
-        offset {page_offset}
-        """
-    try:
-        cursor.execute(query)
+    query = query.limit(page_limit)
+    query = query.offset(page_offset)
 
-        # 获取查询结果
-        results = cursor.fetchall()
+    data_all = query.all()
 
-        # 遍历结果
-        for row in results:
-            ret.add(row[0])
-    except Exception as e:
-        print("Error")
-    finally:
-        # 关闭游标
-        cursor.close()
-        conn.close()
-    return ret
+    adpos_data_collection = []
+
+    for adpos in data_all:
+        adpos_data = {
+            'id': adpos.id,
+            'name': adpos.name,
+        }
+        adpos_data_collection.append(adpos_data)
+
+    return {"total_count": total_count, 'info': adpos_data_collection}
 
 
-def load_all():
-    ret = set()
-    conn = get_mysql_connection()
-    # 创建游标对象
-    cursor = conn.cursor()
+def load_all_adpos():
+    session = mysql_tools.Session()
+    query = session.query(distinct(AdPosInfo.name))
 
-    # 执行查询语句
-    query = """SELECT name 
-    FROM adpos"""
-    try:
-        cursor.execute(query)
+    total_count = query.count()
 
-        # 获取查询结果
-        results = cursor.fetchall()
+    adpos_all = query.all()
 
-        # 遍历结果
-        for row in results:
-            ret.add(row[0])
-    except Exception as e:
-        print()
-    finally:
-        # 关闭游标
-        cursor.close()
-        conn.close()
-    return ret
+    adpos_data_collection = []
+
+    for adpos in adpos_all:
+        adpos_data = {
+            'name': adpos.name,
+            'id': adpos.id
+        }
+        adpos_data_collection.append(adpos_data)
+
+    return {"total_count": total_count, 'info': adpos_data_collection}
 
 
-def get_size():
-    conn = get_mysql_connection()
-    # 创建游标对象
-    cursor = conn.cursor()
+def remove(adpos):
+    session = mysql_tools.Session()
 
-    # 执行查询语句
-    query = f"""SELECT count(*)  
-            FROM adpos      
-            """
-    try:
-        cursor.execute(query)
+    data_to_delete = session.query(AdPosInfo).filter_by(name=adpos).first()
 
-        # 获取查询结果
-        total_count = cursor.fetchone()[0]
+    if data_to_delete:
+        session.delete(data_to_delete)
+        session.commit()
 
-    except Exception as e:
-        return {'error': str(e)}
-    finally:
-        # 关闭游标
-        cursor.close()
-        conn.close()
-    return {'total_count': total_count}
+    return
+
+
+def find(adpos):
+    session = mysql_tools.Session()
+
+    query = session.query(AdPosInfo).filter(AdPosInfo.name.like(f'%{adpos}%'))
+
+    total_count = query.count()
+
+    data_all = query.all()
+
+    for adpos in data_all:
+        adpos_data = {
+            'id': adpos.id,
+            'name': adpos.name
+        }
+        adpos_data_collection.append(adpos_data)
+
+    return {"total_count": total_count, 'info': adpos_data_collection}
+
+
+def add(adpos):
+    session = mysql_tools.Session()
+
+    new_data = AdPosInfo(name=adpos)
+    session.add(new_data)
+    session.commit()
+
+    return new_data

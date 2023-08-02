@@ -7,7 +7,7 @@ import modules.scripts
 from modules.extract_text import get_image_text
 from modules.img_sim import calculate_ssim
 from modules.sensitive_word_detector import SensitiveWordDetector
-from modules.sensitive_words_tools import find_sensitive_word, add_sensitive_word, remove_word_from_sensitive_list
+from modules.sensitive_words_tools import find_sensitive_word, add_sensitive_word, remove
 
 import html
 from modules.paths_internal import javascript_path
@@ -223,7 +223,7 @@ def create_ui():
                 sensitive_word_table = gr.HTML(lambda: word_table())
 
                 del_word_btn.click(
-                    fn=remove_word_from_sensitive_list,
+                    fn=remove,
                     inputs=word_to_del,
                     outputs=None,
                 )

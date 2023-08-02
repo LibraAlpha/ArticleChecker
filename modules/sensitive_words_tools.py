@@ -1,176 +1,93 @@
 import logging
-from modules.db.mysql_tools import get_mysql_connection
+from modules.db import mysql_tools
 from configs import action_code
+from modules.Senswords import SensWord
 
 
 def add_sensitive_word(word):
-    conn = get_mysql_connection()
-    query = f"""
-        insert into sensitive_words (sensitive_word)
-        values ({word})
-        on duplicate key update sensitive_word =values({word})
-    """
+    session = mysql_tools.Session()
 
-    # 创建游标对象
-    cursor = conn.cursor()
+    new_data = SensWord(sensitive_word=word)
 
-    ret = action_code.WORD_ACTION_DEFAULT
+    session.add(new_data)
+    session.commit()
 
-    try:
-        cursor.execute(query)
-        # 提交事务
-        conn.commit()
-        # 校验插入/更新是否成功
-        if cursor.rowcount > 0:
-            ret = action_code.WORD_INSERT_SUCCESS
-        else:
-            ret = "插入/更新失败"
-    except Exception as e:
-        ret = f"错误：{e}"
-    finally:
-        cursor.close()
-        conn.close()
-        return ret
+    return new_data
 
 
 def find_sensitive_word(word):
-    ret = set()
-    conn = get_mysql_connection()
-    query = f"""
-        select * from sensitive_words
-        where
-        sensitive_word like '%{word}%'
-    """
+    session = mysql_tools.Session()
+    query = session.query(SensWord).filter(SensWord.sensitive_word.like(f'%{word}%'))
 
-    cursor = conn.cursor()
-    try:
-        cursor.execute(query)
+    total_count = query.count()
 
-        results = cursor.fetchall()
+    data_all = query.all()
 
-        for row in results:
-            word = row[1]
-            ret.add(word)
-    except Exception as e:
-        logging.warn(e)
+    for adpos in data_all:
+        adpos_data = {
+            'id': adpos.id,
+            'name': adpos.name
+        }
+        adpos_data_collection.append(adpos_data)
 
-    finally:
-        # 关闭游标和连接
-        cursor.close()
-        conn.close()
-
-    return ret
+    return {"total_count": total_count, 'info': adpos_data_collection}
 
 
-def remove_word_from_sensitive_list(word):
-    conn = get_mysql_connection()
-    query = f"""
-        delete from sensitive_words
-        where sensitive_word = {word}
-    """
+def remove(word):
+    session = mysql_tools.Session()
 
-    # 创建游标对象
-    cursor = conn.cursor()
+    word_to_delete = session.query(SensWord).filter(SensWord.sensitive_word == word).first()
 
-    try:
-        cursor.execute(query)
-        # 提交事务
-        conn.commit()
-        # 校验插入/更新是否成功
-        if cursor.rowcount > 0:
-            ret = action_code.WORD_DEL_SUCCESS
-        else:
-            ret = "删除失败，敏感词不存在"
-    except Exception as e:
-        ret = f"错误：{e}"
-
-    finally:
-        cursor.close()
-        conn.close()
-
-    return ret
+    if word_to_delete:
+        session.delete(word_to_delete)
+        session.commit()
+    return
 
 
 def load(page_index, page_limit):
     page_offset = (page_index - 1) * page_limit
 
-    ret = set()
-    conn = get_mysql_connection()
-    # 创建游标对象
-    cursor = conn.cursor()
+    session = mysql_tools.Session()
 
-    # 执行查询语句
-    query = f"""SELECT sensitive_word 
-        FROM sensitive_words        
-        limit {page_limit}
-        offset {page_offset}
-        """
-    try:
-        cursor.execute(query)
+    query = session.query(SensWord)
 
-        # 获取查询结果
-        results = cursor.fetchall()
+    total_count = query.count()
 
-        # 遍历结果
-        for row in results:
-            ret.add(row[0])
-    except Exception as e:
-        print()
-    finally:
-        # 关闭游标
-        cursor.close()
-        conn.close()
-    return ret
+    query = query.limit(page_limit)
+    query = query.offset(page_offset)
 
+    data_all = query.all()
 
-def get_size():
-    conn = get_mysql_connection()
-    # 创建游标对象
-    cursor = conn.cursor()
+    results = []
 
-    # 执行查询语句
-    query = f"""SELECT count(*)  
-            FROM sensitive_words      
-            """
-    try:
-        cursor.execute(query)
+    for sensword in data_all:
+        sensword_data = {
+            'id': sensword.id,
+            'sens_word': sensword.sensitive_word,
+            'updated_at': sensword.updated_at
+        }
+        results.append(sensword_data)
 
-        # 获取查询结果
-        total_count = cursor.fetchone()[0]
-
-    except Exception as e:
-        return {'error': str(e)}
-    finally:
-        # 关闭游标
-        cursor.close()
-        conn.close()
-    return {'total_count': total_count}
+    return {"total_count": total_count, "info": results}
 
 
 def load_all():
-    ret = set()
-    conn = get_mysql_connection()
-    # 创建游标对象
-    cursor = conn.cursor()
+    session = mysql_tools.Session()
 
-    # 执行查询语句
-    query = """
-    SELECT sensitive_word 
-    FROM sensitive_words
-    """
-    try:
-        cursor.execute(query)
+    query = session.query(SensWord)
 
-        # 获取查询结果
-        results = cursor.fetchall()
+    total_count = query.count()
 
-        # 遍历结果
-        for row in results:
-            ret.add(row[0])
-    except Exception as e:
-        print()
-    finally:
-        # 关闭游标
-        cursor.close()
-        conn.close()
-    return ret
+    data_all = query.all()
+
+    results = []
+
+    for sensword in data_all:
+        sensword_data = {
+            'id': sensword.id,
+            'sens_word': sensword.sensitive_word,
+            'updated_at': sensword.updated_at
+        }
+        results.append(sensword_data)
+
+    return {"total_count": total_count, "info": results}

@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, Boolean, Date, Text, BigInteger, VARCHAR
+from sqlalchemy import Column, String, Boolean, Date, Text, BigInteger, VARCHAR, Integer
 from sqlalchemy.ext.declarative import declarative_base
 
 Base = declarative_base()
@@ -11,6 +11,7 @@ class Asset(Base):
     title = Column(String)
     asset_desc = Column(String)
     url = Column(Text)
+    url_md5 = Column(String)
     is_sensitive = Column(Boolean)
     is_checked = Column(Boolean)
     adv = Column(String)
@@ -18,4 +19,8 @@ class Asset(Base):
     reason = Column(String)
     ad_pos = Column(String)
     created_at = Column(String)
-
+    bid = Column(Integer)
+    impression = Column(Integer)
+    click = Column(Integer)
+    url_replaced = Column(String)
+    url_replaced_md5 = Column(String)

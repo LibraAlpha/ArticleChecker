@@ -13,3 +13,6 @@ mysql~=0.0.3
 mysql-connector-python~=8.0.33
 pyspark~=3.4.1
 redis~=4.5.5
+SQLAlchemy~=2.0.19
+pandas~=2.0.2
+setuptools~=60.2.0

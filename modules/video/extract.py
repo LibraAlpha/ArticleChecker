@@ -97,6 +97,7 @@ def run(date):
         video_path = os.path.join(f"D:/url_img/{date}/video/", f"{filename}")
         frame_number = 30  # 要提取的帧数
         output_path = f"D:/url_img/{date}/img/{index}.jpg"  # 保存提取的帧的路径
+
         download_video(url, video_path)
         extract_frame(video_path, frame_number, output_path)
         video_url_pair.append((url, f"{index}.jpg"))
@@ -108,4 +109,4 @@ def run(date):
 
 
 if __name__ == '__main__':
-    run('0723')
+    run('0730')
