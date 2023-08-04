@@ -4,7 +4,7 @@ from ftplib import FTP
 from datetime import datetime
 
 
-def uploadFile(original_file_name: str, local_file_path: str):
+def upload(original_file_name: str, local_file_path: str):
     """
     通过ftp上传文件到cdn服务器，返回图片的cdn地址
     :param original_file_name: 原始图片地址，仅用于进行映射使用
@@ -36,15 +36,9 @@ def uploadFile(original_file_name: str, local_file_path: str):
 
     # 比较本地和远程文件的大小和哈希值
     if remote_file_size == os.path.getsize(local_file_path):
-        print('文件上传成功并校验通过！')
+        ftp.quit()
+        ret_file = f'https://m.kejet.net/ms/i/{folder_path}/save_path'
+        return ret_file
     else:
-        print('文件上传失败或校验未通过！')
+        return -1
 
-    ftp.quit()
-
-    ret_file = f'https://m.kejet.net/ms/i/{folder_path}/save_path'
-    return ret_file
-
-
-if __name__ == '__main__':
-    uploadFile('stick', 'D:/s.jpg')
