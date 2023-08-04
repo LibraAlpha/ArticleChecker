@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 from modules.db import mysql_tools, redis_tools
-from modules.asset import Asset
+from modules.Asset import Asset
 from sqlalchemy import or_
 
 router = APIRouter()
@@ -31,7 +31,8 @@ def get_articles(date: str, page_index: int, page_limit: int):
             'desc': asset.asset_desc,
             'adv': asset.adv,
             'is_checked': asset.is_checked,
-            'sensitive_words': asset.sensitive_words
+            'sensitive_words': asset.sensitive_words,
+            'adpos': asset.ad_pos
         }
         assets_data.append(asset_data)
 
@@ -72,7 +73,9 @@ def find_articles(date: str, page_index: int, page_limit: int, adv: str, keyword
             'desc': asset.asset_desc,
             'adv': asset.adv,
             'is_checked': asset.is_checked,
-            'created_at': asset.created_at
+            'created_at': asset.created_at,
+            'id': asset.id,
+            'sensitive_words': asset.sensitive_words
         }
         assets_data.append(asset_data)
 
@@ -115,8 +118,16 @@ def get_black_list(date: str, page_index: int, page_limit: int, adv: str):
             'desc': asset.asset_desc,
             'adv': asset.adv,
             'is_checked': asset.is_checked,
-            'created_at': asset.created_at
+            'created_at': asset.created_at,
+            'id': asset.id,
+            'sensitive_words': asset.sensitive_words,
+            'adpos': asset.ad_pos
         }
         assets_data.append(asset_data)
 
     return {"total_count": total_count, 'info': assets_data}
+
+
+@router.put('/api/assets/blacklist/add')
+def add_to_blacklist(id: int):
+    return
