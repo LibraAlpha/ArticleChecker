@@ -12,8 +12,6 @@ def load_assets(date, page_index, is_sensitive, is_checked):
 
     ret = list()
 
-
-
     return ret
 
 

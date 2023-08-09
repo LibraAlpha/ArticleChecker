@@ -37,7 +37,7 @@ def upload(original_file_name: str, local_file_path: str):
     # 比较本地和远程文件的大小和哈希值
     if remote_file_size == os.path.getsize(local_file_path):
         ftp.quit()
-        ret_file = f'https://m.kejet.net/ms/i/{folder_path}/save_path'
+        ret_file = f'https://m.kejet.net/ms/i/{folder_path}/{save_path}'
         return ret_file
     else:
         return -1

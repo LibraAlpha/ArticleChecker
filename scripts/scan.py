@@ -11,6 +11,7 @@ from modules.tools import parse_img_url
 from modules.db import redis_tools
 from modules.db import mysql_tools
 from modules.secret import get_md5_hash
+from modules.Asset import Asset
 
 from scripts.load_ad_pos import default_list
 
@@ -83,70 +84,73 @@ class Scanner(object):
                 desc_base64 = item['desc']
 
     def write_to_mysql(self, iterator):
-        conn = mysql_tools.get_mysql_connection()
-        cursor = conn.cursor()
-
         count = 0
-
+        session = mysql_tools.sessionmaker(bind=mysql_tools.engine)
         for row in iterator:
-            asset_url = row.img_url
-            asset_title = row.title
-            asset_description = row.description
-            asset_adv = row.adv
-            ad_pos = row.ad_pos
-            asset_url_md5 = get_md5_hash(asset_url)
-            asset_dt = row.dt
-
-            if not asset_url:
-                continue
-
-            if not asset_title or asset_title == 'NULL':
-                asset_title = ''
-
-            if not asset_description or asset_description == 'NULL':
-                asset_description = ''
-
-            insert_query = f"""
-            INSERT into assets(url, url_md5, title, asset_desc, adv, ad_pos) 
-            values ('{asset_url}', '{asset_url_md5}', '{asset_title}', '{asset_description}',  '{asset_adv}', '{ad_pos}')
-            on duplicate key update 
-            url = '{asset_url}',
-            url_md5 = '{asset_url_md5}',
-            title = '{asset_title}',
-            asset_desc = '{asset_description}',
-            adv = '{asset_adv}',
-            ad_pos = '{ad_pos}'            
-            """
-
-            cursor.execute(insert_query)
+            asset = Asset()
+            asset.url = row.img_url
+            asset.title = row.title
+            asset.description = row.description
+            asset.adv = row.adv
+            asset.ad_pos = row.ad_pos
+            asset.url_md5 = get_md5_hash(asset_url)
+            asset.created_at = row.dt
 
             count += 1
 
             if count % 1000 == 0:
-                conn.commit()
-                count = 0
+                session.commit()
 
-        conn.commit()
 
-        cursor.close()
-        conn.close()
 
-    def scan(self, date, hour=0):
-        sql_get_data = f"""
-            select get_json_object(kafka_value, '$.IUL') as img_url,
+    def scan(self, date):
+        get_bid_data = f"""
+            select get_json_object(kafka_value, '$.id') as id,
+            get_json_object(kafka_value, '$.IUL') as img_url,
             get_json_object(kafka_value, '$.AT') as title,
             get_json_object(kafka_value, '$.AD') as description,
-            get_json_object(kafka_value, '$.I') as ad_pos,
+            get_json_object(kafka_value, '$.I') as adpos,
             get_json_object(kafka_value, '$.C') as adv,
-            dt            
+            1 as bid,            
             from wiseadx.ods_data_mor_ro
-            where dt = '{date}'
-            and h = '{hour}';
-            and get_json_object(kafka_value, '$.I') in {default_list}            
+            where dt = '{date}'           
+            and type='B'
+            and get_json_object(kafka_value, '$.IUL') not null
+            and hr = '1'            
         """
 
-        df = self.spark.sql(sql_get_data).drop_duplicates().repartition(200)
-        df.foreachPartition(self.write_to_mysql)
+        get_impression_data = f"""
+          select get_json_object(kafka_value, '$.id') as id, 1 as impression                        
+            from wiseadx.ods_data_mor_ro
+            where dt = '{date}'           
+            and type='R'
+            and hr = '1'   
+        """
+
+        get_click_data = f"""
+            select get_json_object(kafka_value, '$.id') as id, 1 as click                        
+            from wiseadx.ods_data_mor_ro
+            where dt = '{date}'           
+            and type='C'
+            and hr = '1'
+        """
+
+        bid_data = self.spark.sql(get_bid_data).drop_duplicates().repartition(2000).fillna('None')
+        impression_data = self.spark.sql(get_impression_data).drop_duplicates().repartition(2000)
+        click_data = self.spark.sql(get_click_data).drop_duplicates().repartition(2000)
+
+        combined = bid_data.join(impression_data, on='id', how='left').join(click_data, on='id', how='left')\
+
+
+        stats = combined.groupBy('adpos', 'adv', 'img_url').agg(
+            sum(col('bid')).cast('int').alias('bids'),
+            sum(col('impression')).cast('int').alias('impressions'),
+            sum(col('click')).cast('int').alias('clicks')
+        )
+
+        stats.write.mode('overwrite')\
+            .option('header', 'true')\
+            .csv('hdfs://hdfscluster/user/hive/warehouse/test.db/export/tag=asset_report.csv')
 
         return "Done"
 
@@ -165,4 +169,4 @@ if __name__ == '__main__':
 
     print(input_date, hour)
 
-    scanner.scan(date, hour)
+    scanner.scan(date)

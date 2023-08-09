@@ -90,5 +90,5 @@ def add(adpos):
     new_data = AdPosInfo(name=adpos)
     session.add(new_data)
     session.commit()
-
+    session.close()
     return new_data
