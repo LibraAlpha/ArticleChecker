@@ -94,7 +94,7 @@ class Scanner(object):
             where dt = '{date}'           
             and type='B'
             and get_json_object(kafka_value, '$.IUL') is not null
-            and h = '1'            
+            and h = '3'            
         """
 
         get_impression_data = f"""
@@ -102,7 +102,7 @@ class Scanner(object):
             from wiseadx.ods_data_mor_ro
             where dt = '{date}'           
             and type='R'
-            and h = '1'   
+            and h = '3'   
         """
 
         get_click_data = f"""
@@ -110,7 +110,7 @@ class Scanner(object):
             from wiseadx.ods_data_mor_ro
             where dt = '{date}'           
             and type='C'
-            and h = '1'
+            and h = '3'
         """
 
         bid_data = self.spark.sql(get_bid_data).drop_duplicates().repartition(2000).fillna('None')
