@@ -1,6 +1,5 @@
 import sys
 import argparse
-import redis
 import hashlib
 import configs.redis as redis_config
 from pyspark.sql.functions import explode, split, col, udf, when, concat_ws
@@ -8,7 +7,6 @@ from pyspark.sql import SparkSession
 from pyspark.sql.types import StringType, IntegerType, ArrayType, DoubleType
 from pyspark import SparkConf, SparkContext
 from modules.tools import parse_img_url
-from modules.db import redis_tools
 from modules.db import mysql_tools
 from modules.secret import get_md5_hash
 from modules.Asset import Asset
@@ -22,46 +20,6 @@ class Scanner(object):
         super().__init__()
         self.spark = SparkSession.builder.enableHiveSupport().getOrCreate()
         self.sparkContext = self.spark.sparkContext
-
-    """
- 
-    """
-
-    def write_to_redis(self, partition):
-        redis_client = redis_tools.get_redis_client()
-        for row in partition:
-            title_encoded = row['ad_title']  # title与desc可能存在多个，不同广告主之间通过|分割，格式为“广告主id-base64编码内容”
-            desc_encoded = row['ad_description']
-            img_url = row['img_url']
-
-            title_list = title_encoded.split('|')
-            desc_list = desc_encoded.split('|')
-            img_url_list = img_url.split('|')
-
-            tmp_list = dict()
-
-            for item_url in img_url_list:
-                url_info = item_url.split['|']
-                advertizer, img_url_raw = url_info[0], url_info[1]
-                processed_img_url = parse_img_url(img_url_raw)
-                tmp_list[advertizer]['url'] = processed_img_url
-                tmp_list[advertizer]['title'] = ''
-                tmp_list[advertizer]['desc'] = ''
-
-            for item_title in title_list:
-                title_info = item_title.split('-')
-                advertizer, base64_title = title_info[0], title_info[1]
-                tmp_list[advertizer]['title'] = base64_title
-
-            for item_desc in desc_list:
-                desc_info = item_desc.split('-')
-                advertizer, base64_desc = desc_info[0], desc_info[1]
-                tmp_list[advertizer]['desc'] = base64_desc
-
-            for key, item in tmp_list.items():
-                img_url_raw = item['url']
-                title_base64 = item['title']
-                desc_base64 = item['desc']
 
     def write_to_mysql(self, iterator):
         count = 0
