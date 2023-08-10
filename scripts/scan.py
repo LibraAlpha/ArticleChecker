@@ -24,27 +24,7 @@ class Scanner(object):
         self.sparkContext = self.spark.sparkContext
 
     """
-    redis结构：
-    uncensored: {
-        assert_url: {
-            title: xxx,
-            desc: xxx
-        }
-        another_assert_url: {
-            title: xxx,
-            desc: xxx
-        }
-    }
-    blocked:{
-        assert_url: {
-            title: xxx,
-            desc: xxx
-        }
-        another_blocked_assert_url: {
-            title: xxx,
-            desc: xxx
-        }         
-    }
+ 
     """
 
     def write_to_redis(self, partition):
@@ -101,8 +81,6 @@ class Scanner(object):
             if count % 1000 == 0:
                 session.commit()
 
-
-
     def scan(self, date):
         get_bid_data = f"""
             select get_json_object(kafka_value, '$.id') as id,
@@ -111,12 +89,12 @@ class Scanner(object):
             get_json_object(kafka_value, '$.AD') as description,
             get_json_object(kafka_value, '$.I') as adpos,
             get_json_object(kafka_value, '$.C') as adv,
-            1 as bid,            
+            1 as bid            
             from wiseadx.ods_data_mor_ro
             where dt = '{date}'           
             and type='B'
-            and get_json_object(kafka_value, '$.IUL') not null
-            and hr = '1'            
+            and get_json_object(kafka_value, '$.IUL') is not null
+            and h = '1'            
         """
 
         get_impression_data = f"""
@@ -124,7 +102,7 @@ class Scanner(object):
             from wiseadx.ods_data_mor_ro
             where dt = '{date}'           
             and type='R'
-            and hr = '1'   
+            and h = '1'   
         """
 
         get_click_data = f"""
@@ -132,15 +110,14 @@ class Scanner(object):
             from wiseadx.ods_data_mor_ro
             where dt = '{date}'           
             and type='C'
-            and hr = '1'
+            and h = '1'
         """
 
         bid_data = self.spark.sql(get_bid_data).drop_duplicates().repartition(2000).fillna('None')
         impression_data = self.spark.sql(get_impression_data).drop_duplicates().repartition(2000)
         click_data = self.spark.sql(get_click_data).drop_duplicates().repartition(2000)
 
-        combined = bid_data.join(impression_data, on='id', how='left').join(click_data, on='id', how='left')\
-
+        combined = bid_data.join(impression_data, on='id', how='left').join(click_data, on='id', how='left')
 
         stats = combined.groupBy('adpos', 'adv', 'img_url').agg(
             sum(col('bid')).cast('int').alias('bids'),
@@ -148,8 +125,8 @@ class Scanner(object):
             sum(col('click')).cast('int').alias('clicks')
         )
 
-        stats.write.mode('overwrite')\
-            .option('header', 'true')\
+        stats.write.mode('overwrite') \
+            .option('header', 'true') \
             .csv('hdfs://hdfscluster/user/hive/warehouse/test.db/export/tag=asset_report.csv')
 
         return "Done"
