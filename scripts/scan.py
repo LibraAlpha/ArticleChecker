@@ -137,7 +137,7 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description="Arg parser for ctr prediction.")
     parser.add_argument('--date', type=str, help='yyyy-mm-dd format date string')
-    parser.add_argument('--hour', type=str, help='data period')
+    # parser.add_argument('--hour', type=str, help='data period')
 
     args = parser.parse_args()
 

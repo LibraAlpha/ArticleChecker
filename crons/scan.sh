@@ -51,7 +51,7 @@ mydate=$input_date
 -c "spark.pyspark.python=./python3/bin/python3" \
 -c "spark.sql.mapKeyDedupPolicy=LAST_WIN" \
 -c "spark.yarn.maxAppAttempts=1" \
-/opt/dmp/analyze/verify.py --date "$mydate" --action "$action"
+/opt/adx/ArticleChecker/scripts/scan.py --date "$mydate"
 #-c "spark.executor.memoryOverhead=8g" \
 #-c "spark.driver.memory=4g" \
 #-c "spark.executor.cores=2" \
