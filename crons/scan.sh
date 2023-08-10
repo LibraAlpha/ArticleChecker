@@ -39,7 +39,7 @@ echo "$input_date" "$action"
 mydate=$input_date
 
 /usr/local/spark/bin/spark-submit --master yarn --deploy-mode cluster --name assets_scan \
---py-files ArticleChecker.zip \
+--py-files /opt/adx/ArticleChecker/ArticleChecker.zip \
 --files /usr/local/hive/conf/hive-site.xml \
 --archives "hdfs://hdfscluster/spark/application/python_ext/python3.tgz#python3" \
 --packages org.apache.hudi:hudi-spark3.3-bundle_2.12:0.13.0 \
