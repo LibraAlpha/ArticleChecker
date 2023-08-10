@@ -1,7 +1,6 @@
 import sys
 import argparse
 import hashlib
-import configs.redis as redis_config
 from pyspark.sql.functions import explode, split, col, udf, when, concat_ws
 from pyspark.sql import SparkSession
 from pyspark.sql.types import StringType, IntegerType, ArrayType, DoubleType
