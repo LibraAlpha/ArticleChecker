@@ -25,18 +25,13 @@ class Scanner(object):
         session = mysql_tools.sessionmaker(bind=mysql_tools.engine)
         try:
             for row in iterator:
-
                 asset = Asset()
                 asset.url = row['img_url']
-                asset.title = row['title']
-                asset.description = row['description']
                 asset.adv = row['adv']
                 asset.ad_pos = row['ad_pos']
                 asset.url_md5 = get_md5_hash(asset_url)
                 asset.created_at = dt
-
                 count += 1
-
                 if count % 1000 == 0:
                     session.commit()
         except Exception as e:

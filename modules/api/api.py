@@ -17,14 +17,16 @@ from secrets import compare_digest
 
 from PIL import PngImagePlugin, Image
 
-from modules.api import sens_words, article, ad_pos, img
+from modules.api import sens_words, asset, ad_pos, img
 
 app = FastAPI()
 
 app.include_router(sens_words.router)
-app.include_router(article.router)
+app.include_router(asset.router)
 app.include_router(ad_pos.router)
 app.include_router(img.router)
+app.include_router(auth.router)
+
 
 origins = ['*']
 

@@ -24,3 +24,6 @@ class Asset(Base):
     click = Column(Integer)
     url_replaced = Column(String)
     url_replaced_md5 = Column(String)
+    video_url = Column(String)
+    video_url_md5 = Column(String)
+    logo_url = Column(String)

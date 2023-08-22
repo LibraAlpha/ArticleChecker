@@ -26,13 +26,19 @@ def get_articles(date: str, page_index: int, page_limit: int):
 
     for asset in assets:
         asset_data = {
+            'id': asset.id,
             'url': asset.url,
             'title': asset.title,
             'desc': asset.asset_desc,
             'adv': asset.adv,
             'is_checked': asset.is_checked,
             'sensitive_words': asset.sensitive_words,
-            'adpos': asset.ad_pos
+            'adpos': asset.ad_pos,
+            'url_replaced': asset.url_replaced,
+            'video_url': asset.video_url,
+            'bid': asset.bid,
+            'impression': asset.impression,
+            'click': asset.click
         }
         assets_data.append(asset_data)
 
