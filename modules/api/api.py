@@ -17,7 +17,7 @@ from secrets import compare_digest
 
 from PIL import PngImagePlugin, Image
 
-from modules.api import sens_words, asset, ad_pos, img
+from modules.api import sens_words, asset, ad_pos, img, auth
 
 app = FastAPI()
 
